@@ -1,14 +1,17 @@
 import React from "react";
-import Search from "./components/Search";
-import Article from "./components/Article";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import { Provider } from "react-redux";
+
+import Home from "./components/Home";
+import configureStore from "./store/configureStore";
 
 const App = () => {
   return (
-    <div className="App">
-      <header className="App-header"></header>
-      <Search />
-      <Article />
-    </div>
+    <Router>
+      <Provider store={configureStore}>
+        <Route exact path="/" component={Home} />
+      </Provider>
+    </Router>
   );
 };
 
