@@ -1,6 +1,7 @@
 export const initialState = {
   articleAList: [],
   articleBList: [],
+  articleA: [],
 
   loadArticleALoading: false,
   loadArticleADone: false,
@@ -9,6 +10,10 @@ export const initialState = {
   loadArticleBLoading: false,
   loadArticleBDone: false,
   loadArticleBError: null,
+
+  loadArticlePageALoading: false,
+  loadArticlePageADone: false,
+  loadArticlePageAError: null,
 };
 
 export const LOAD_ARTICLE_A_REQUEST = "LOAD_ARTICLE_A_REQUEST";
@@ -19,8 +24,11 @@ export const LOAD_ARTICLE_B_REQUEST = "LOAD_ARTICLE_B_REQUEST";
 export const LOAD_ARTICLE_B_SUCCESS = "LOAD_ARTICLE_B_SUCCESS";
 export const LOAD_ARTICLE_B_FAILURE = "LOAD_ARTICLE_B_FAILURE";
 
+export const LOAD_ARTICLE_PAGE_A_REQUEST = "LOAD_ARTICLE_PAGE_A_REQUEST";
+export const LOAD_ARTICLE_PAGE_A_SUCCESS = "LOAD_ARTICLE_PAGE_A_SUCCESS";
+export const LOAD_ARTICLE_PAGE_A_FAILURE = "LOAD_ARTICLE_PAGE_A_FAILURE";
+
 export const loadArticleARequest = (data) => {
-  console.log("loadArticleARequest : ", data);
   return {
     type: LOAD_ARTICLE_A_REQUEST,
     data,
@@ -34,10 +42,16 @@ export const loadArticleBRequest = (data) => {
   };
 };
 
+export const loadArticlePageARequest = (data) => {
+  return {
+    type: LOAD_ARTICLE_PAGE_A_REQUEST,
+    data,
+  };
+};
+
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case LOAD_ARTICLE_A_REQUEST:
-      console.log("article A request reducer : ", state, action);
       return {
         ...state,
         loadArticleALoading: true,
@@ -45,7 +59,6 @@ const reducer = (state = initialState, action) => {
         loadArticleAError: null,
       };
     case LOAD_ARTICLE_A_SUCCESS:
-      console.log("article A success reducer : ", action);
       return {
         ...state,
         loadArticleALoading: false,
@@ -53,7 +66,6 @@ const reducer = (state = initialState, action) => {
         articleAList: [...state.articleAList, ...action.data],
       };
     case LOAD_ARTICLE_A_FAILURE:
-      console.log("article A failure reducer : ", state, action);
       return {
         ...state,
         loadArticleALoading: false,
@@ -72,7 +84,7 @@ const reducer = (state = initialState, action) => {
         ...state,
         loadArticleBLoading: false,
         loadArticleBDone: true,
-        articleBList: action.data,
+        articleBList: [...state.articleBList, ...action.data],
       };
     case LOAD_ARTICLE_B_FAILURE:
       return {
@@ -80,6 +92,28 @@ const reducer = (state = initialState, action) => {
         loadArticleBLoading: false,
         loadArticleBError: action.error,
       };
+
+    case LOAD_ARTICLE_PAGE_A_REQUEST:
+      return {
+        ...state,
+        loadArticlePageALoading: true,
+        loadArticlePAgeADone: false,
+        loadArticlePageAError: null,
+      };
+    case LOAD_ARTICLE_PAGE_A_SUCCESS:
+      return {
+        ...state,
+        loadArticlePageALoading: false,
+        loadArticlePageADone: true,
+        articleA: [...state.articleA, ...action.data],
+      };
+    case LOAD_ARTICLE_PAGE_A_FAILURE:
+      return {
+        ...state,
+        loadArticlePageALoading: false,
+        loadArticlePageAError: action.error,
+      };
+
     default:
       return state;
   }

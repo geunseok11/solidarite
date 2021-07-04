@@ -1,85 +1,102 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { loadArticleARequest } from "../reducers/article";
+import { loadArticleARequest, loadArticleBRequest } from "../reducers/article";
+import styled from "styled-components";
 import Search from "./Search";
 
-const Article = (props) => {
-  const dispatch = useDispatch();
-  console.log("article props :", props);
-  let [articleA, setArticleA] = useState([]);
-  let [hitBottom, sethitBottom] = useState(false);
-  let [iterator, setiterator] = useState(0);
-  // const [title, setTitle] = useState('')
+const Button = styled.button`
+  position: relative;
+  background: #ffffff;
+  border: none;
+  cursor: pointer;
 
-  // Search(title)
+  margin-left: 15px;
+
+  ${({ click }) => {
+    return click ? `color: #1fa6f1;` : `color: #000000`;
+  }};
+`;
+
+const ArticleDiv = styled.div`
+  border-top: 1px solid;
+  margin-top: 10px;
+`;
+
+const Article = () => {
+  const dispatch = useDispatch();
+
+  let [articleA, setArticleA] = useState([]);
+  let [articleB, setArticleB] = useState([]);
+  let [hitBottom, sethitBottom] = useState(false);
+  let [hitBottomB, sethitBottomB] = useState(false);
+  let [iterator, setiterator] = useState(0);
+  let [iteratorB, setiteratorB] = useState(0);
+  let [postA, setPostA] = useState(true);
+  let [postB, setPostB] = useState(false);
 
   const articleAList = useSelector((state) => state?.article.articleAList);
 
-  console.log("articleAList in Article : ", articleAList);
+  const article = useSelector((state) => state?.article);
 
-  console.log("articleA in Article AA: ", articleA);
+  console.log("article state", article);
 
-  useEffect(() => {
-    sethitBottom(false);
-    if (iterator < 10) {
-      iterator++;
-      setiterator(iterator);
-
-      // setArticleA(articleAList);
-      dispatch(loadArticleARequest(iterator));
-    }
-  }, [hitBottom]);
+  const articleBList = useSelector((state) => state?.article.articleBList);
 
   // useEffect(() => {
   //   sethitBottom(false);
-
-  //   axios.get(`/a-posts?page=${iterator}`).then((res) => {
-  //     console.log("axios res :", res.data);
+  //   if (iterator < 10) {
   //     iterator++;
   //     setiterator(iterator);
-  //     articleA = [...articleA, ...res.data];
-  //     setArticleA(articleA);
-  //   });
+  //     dispatch(loadArticleARequest(iterator));
+  //   }
+  //   if (iteratorB < 10) {
+  //     iteratorB++;
+  //     setiteratorB(iteratorB);
+  //     dispatch(loadArticleBRequest(iteratorB));
+  //   }
   // }, [hitBottom]);
+
+  useEffect(() => {
+    sethitBottom(false);
+
+    axios.get(`/a-posts?page=${iterator}`).then((res) => {
+      console.log("axios res :", res.data);
+      iterator++;
+      setiterator(iterator);
+      articleA = [...articleA, ...res.data];
+      setArticleA(articleA);
+    });
+  }, [hitBottom]);
+
+  useEffect(() => {
+    sethitBottomB(false);
+
+    axios.get(`/b-posts?page=${iteratorB}`).then((res) => {
+      console.log("axios res :", res.data);
+      iteratorB++;
+      setiteratorB(iteratorB);
+      articleB = [...articleB, ...res.data];
+      setArticleB(articleB);
+    });
+  }, [hitBottomB]);
 
   const onScroll = () => {
     if (
       window.scrollY + document.documentElement.clientHeight >
       document.documentElement.scrollHeight - 10
     ) {
-      // dispatch(loadingScreen);
       sethitBottom(true);
+      sethitBottomB(true);
     }
   };
 
-  // // useEffect에서 addEvent를 한 경우 반드시 clean up을 해줍시다.
   useEffect(() => {
     window.addEventListener("scroll", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
-
-  // const infiniteScroll = useCallback(() => {
-  //   // const { documentElement, body } = document;
-
-  //   // const scrollHeight = Math.max(
-  //   //   documentElement.scrollHeight,
-  //   //   body.scrollHeight
-  //   // );
-  //   // const scrollTop = Math.max(documentElement.scrollTop, body.scrollTop);
-  //   // const clientHeight = documentElement.clientHeight;
-
-  //   const scrollHeight = document.documentElement.scrollHeight;
-  //   const scrollTop = document.documentElement.scrollTop;
-  //   const clientHeight = document.documentElement.clientHeight;
-
-  //   if (scrollTop + clientHeight >= scrollHeight) {
-  //     setiterator(iterator + 1);
-  //     dispatch(loadArticleARequest(iterator));
-  //   }
-  // }, [iterator]);
 
   useEffect(() => {
     if (articleAList && articleAList > 0) {
@@ -88,36 +105,154 @@ const Article = (props) => {
   }, [articleAList]);
 
   useEffect(() => {
-    dispatch(loadArticleARequest(iterator - 1));
-  }, [iterator]);
+    if (articleBList && articleBList > 0) {
+      articleBList = [];
+    }
+  }, [articleBList]);
+
+  // useEffect(() => {
+  //   dispatch(loadArticleARequest(iterator));
+  // }, [iterator]);
+
+  // useEffect(() => {
+  //   dispatch(loadArticleBRequest(iteratorB));
+  // }, [iteratorB]);
+
+  var searchAList = useSelector((state) => state.search?.searchAList);
+
+  useEffect(() => {
+    if (searchAList && searchAList.length > 0) {
+      searchAList = [];
+    }
+  }, [searchAList]);
 
   return (
     <div>
-      {/* {articleA.map((el) => (
-        <section key={el._id}>
-          <ul>
-            <a>
-              <li>
-                <h3>{el.title}</h3>
-                <p>{el.content}</p>
-              </li>
-            </a>
-          </ul>
-        </section>
-      ))} */}
-      {articleAList &&
-        articleAList.map((el) => (
-          <section key={el.id}>
-            <ul>
-              <a>
-                <li>
-                  <h3>{el.title}</h3>
-                  <p>{el.content}</p>
-                </li>
-              </a>
-            </ul>
-          </section>
-        ))}
+      <Button
+        onClick={() => {
+          setPostA(true);
+          setPostB(false);
+        }}
+        click={postA}
+      >
+        POST A
+      </Button>
+      <Button
+        onClick={() => {
+          setPostA(false);
+          setPostB(true);
+        }}
+        click={postB}
+      >
+        POST B
+      </Button>
+      <ArticleDiv>
+        {/* {searchAList !== [] ? (
+          <div>
+            {searchAList &&
+              searchAList.map((el) => {
+                return (
+                  <section key={el.id}>
+                    <ul>
+                      <a>
+                        <li>
+                          <h3>
+                            <span>{el.id}.</span>
+                            {el.title}
+                          </h3>
+                          <p>{el.content}</p>
+                        </li>
+                      </a>
+                    </ul>
+                  </section>
+                );
+              })}
+          </div>
+        ) : (
+          <div>
+            {postA ? (
+              <div>
+                {articleAList &&
+                  articleAList.map((el) => {
+                    return (
+                      <section key={el.id}>
+                        <ul>
+                          <a>
+                            <li>
+                              <h3>
+                                <span>{el.id}.</span>
+                                {el.title}
+                              </h3>
+                              <p>{el.content}</p>
+                            </li>
+                          </a>
+                        </ul>
+                      </section>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div>
+                {articleBList &&
+                  articleBList.map((el) => {
+                    return (
+                      <section key={el.id}>
+                        <ul>
+                          <a>
+                            <li>
+                              <h3>
+                                <span>{el.id}.</span>
+                                {el.title}
+                              </h3>
+                              <p>{el.content}</p>
+                            </li>
+                          </a>
+                        </ul>
+                      </section>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        )} */}
+        {postA ? (
+          <div>
+            {articleA.map((el) => (
+              <section key={el._id}>
+                <ul>
+                  <a>
+                    <li>
+                      <h3>
+                        <span>{el.id}.</span>
+                        {el.title}
+                      </h3>
+                      <p>{el.content}</p>
+                    </li>
+                  </a>
+                </ul>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div>
+            {articleB.map((el) => (
+              <section key={el._id}>
+                <ul>
+                  <a>
+                    <li>
+                      <h3>
+                        <span>{el.id}.</span>
+                        {el.title}
+                      </h3>
+                      <p>{el.content}</p>
+                    </li>
+                  </a>
+                </ul>
+              </section>
+            ))}
+          </div>
+        )}
+      </ArticleDiv>
     </div>
   );
 };
